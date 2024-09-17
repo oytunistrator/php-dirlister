@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /
+
+# Gerçek dosya veya klasör yoksa index.php'ye yönlendir
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Eğer URL boşsa ana dizini göster
+RewriteRule ^$ index.php?dir=/ [L,QSA]
+
+# Diğer URL'leri index.php'ye yönlendir ve "dir" parametresi olarak geç
+RewriteRule ^(.*)$ index.php?dir=/$1 [L,QSA]
