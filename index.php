@@ -83,7 +83,7 @@
         echo '</div>';
         closedir($dir_handle);
     } else {
-        echo '<div class="alert alert-danger">Folder Error.</div>';
+        echo '<div class="alert alert-danger">519 Error.</div>';
     }
     ?>
 
