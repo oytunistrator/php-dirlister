@@ -29,7 +29,7 @@
     $baseDirectory = realpath('.');
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $currentDirectory = realpath($baseDirectory . ($requestUri === '/' ? '' : $requestUri));
-    $ignoreList = array(".", "..", "awstatsicons", "index.php", "icon", "awstats-icon", "index.html", ".htaccess", ".user.ini");
+    $ignoreList = array(".", "..", "index.php", "index.html", ".htaccess", ".user.ini");
     if (strpos($currentDirectory, $baseDirectory) !== 0 || !is_dir($currentDirectory)) {
         echo '<div class="alert alert-danger">Geçersiz klasör yolu.</div>';
         exit;
