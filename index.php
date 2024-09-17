@@ -74,7 +74,7 @@
 
                 if (is_dir($currentDirectory . '/' . $file)) {
                     echo '<a href="' . htmlspecialchars($filePath) . '" class="list-group-item list-group-item-action list-group-item-primary">
-                            <i class="bi bi-folder"></i> ' . htmlspecialchars($file) . ' (Folder)
+                            <i class="bi bi-folder"></i> ' . htmlspecialchars($file) . '
                           </a>';
                 } else {
                     echo '<a href="' . htmlspecialchars($filePath) . '" download class="list-group-item list-group-item-action">
@@ -86,7 +86,7 @@
         echo '</div>';
         closedir($dir_handle);
     } else {
-        echo '<div class="alert alert-danger">Klasör açılamadı.</div>';
+        echo '<div class="alert alert-danger">Error.</div>';
     }
     ?>
 
