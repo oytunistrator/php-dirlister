@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DirLister</title>
+    <title>Files</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Footer'ı sabit tutmak için */
         footer {
             position: fixed;
             bottom: 0;
@@ -26,15 +27,17 @@
     <h2 class="my-4">Directory Listing</h2>
 
     <?php
-    $baseDirectory = realpath('.');
+    $baseDirectory = realpath('.'); 
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
     $currentDirectory = realpath($baseDirectory . ($requestUri === '/' ? '' : $requestUri));
-    $ignoreList = array(".", "..", "index.php", "index.html", ".htaccess", ".user.ini");
+
+    $ignoreList = array(".", "..", "awstatsicons", "index.php", "icon", "awstats-icon", "index.html", ".htaccess", ".user.ini");
+
     if (strpos($currentDirectory, $baseDirectory) !== 0 || !is_dir($currentDirectory)) {
-        echo '<div class="alert alert-danger">Folder is not exist.</div>';
+        echo '<div class="alert alert-danger">Folder not exist.</div>';
         exit;
     }
-
     $breadcrumbs = [];
     $path = '';
     $parts = explode('/', trim($requestUri, '/'));
@@ -47,6 +50,7 @@
     }
 
     $domain = $_SERVER['HTTP_HOST'];
+
     echo '<nav aria-label="breadcrumb">';
     echo '<ol class="breadcrumb">';
     echo '<li class="breadcrumb-item"><a href="/">'.$domain.'</a></li>';
@@ -67,14 +71,14 @@
         while (($file = readdir($dir_handle)) !== false) {
             if (!in_array($file, $ignoreList)) {
                 $filePath = $requestUri . '/' . $file;
-                $filePath = str_replace('//', '/', $filePath);
+                $filePath = str_replace('//', '/', $filePath); 
 
                 if (is_dir($currentDirectory . '/' . $file)) {
                     echo '<a href="' . htmlspecialchars($filePath) . '" class="list-group-item list-group-item-action list-group-item-primary">
                             <i class="bi bi-folder"></i> ' . htmlspecialchars($file) . ' (Folder)
                           </a>';
                 } else {
-                    echo '<a href="' . htmlspecialchars($filePath) . '" class="list-group-item list-group-item-action">
+                    echo '<a href="' . htmlspecialchars($filePath) . '" download class="list-group-item list-group-item-action">
                             <i class="bi bi-file-earmark"></i> ' . htmlspecialchars($file) . '
                           </a>';
                 }
@@ -83,17 +87,17 @@
         echo '</div>';
         closedir($dir_handle);
     } else {
-        echo '<div class="alert alert-danger">519 Error.</div>';
+        echo '<div class="alert alert-danger">Klasör açılamadı.</div>';
     }
     ?>
 
 </div>
 
 <footer class="bg-dark text-white text-center py-3 fixed-bottom">
-    <p>Dirlister © <?php echo date("Y"); ?></p>
+    <p><a href="https://github.com/oytunistrator/php-dirlister/">PHP DirLister</a> © <?php echo date("Y"); ?></p>
 </footer>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html> 
