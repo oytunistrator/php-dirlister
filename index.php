@@ -31,7 +31,7 @@
     $currentDirectory = realpath($baseDirectory . ($requestUri === '/' ? '' : $requestUri));
     $ignoreList = array(".", "..", "index.php", "index.html", ".htaccess", ".user.ini");
     if (strpos($currentDirectory, $baseDirectory) !== 0 || !is_dir($currentDirectory)) {
-        echo '<div class="alert alert-danger">Geçersiz klasör yolu.</div>';
+        echo '<div class="alert alert-danger">Folder is not exist.</div>';
         exit;
     }
 
