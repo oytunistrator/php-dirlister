@@ -9,7 +9,6 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Footer'ı sabit tutmak için */
         footer {
             position: fixed;
             bottom: 0;
@@ -94,7 +93,7 @@
 </div>
 
 <footer class="bg-dark text-white text-center py-3 fixed-bottom">
-    <p><a href="https://github.com/oytunistrator/php-dirlister/">PHP DirLister</a> © <?php echo date("Y"); ?></p>
+    <p><a href="https://github.com/oytunistrator/php-dirlister/" class="text-white">PHP DirLister</a> © <?php echo date("Y"); ?></p>
 </footer>
 
 <!-- Bootstrap JS -->
