@@ -99,16 +99,16 @@ if ($fileParam) {
 
     if ($realFilePath && is_file($realFilePath) && strpos($realFilePath, $baseDirectory) === 0 && in_array(strtolower(pathinfo($realFilePath, PATHINFO_EXTENSION)), $allowedExtensions)) {
         $content = file_get_contents($realFilePath);
+        echo '<a href="?dir=' . htmlspecialchars($parentUrl) . '" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Go Back</a>';
         echo '<div class="card mb-3"><div class="card-body">';
         echo '<h5>' . htmlspecialchars(basename($realFilePath)) . '</h5>';
         echo '<pre>' . nl2br(htmlspecialchars($content)) . '</pre>';
         echo '</div></div>';
-
         $parentDir = dirname($fileDecoded);
         $parentUrl = ($parentDir && $parentDir !== '.' && $parentDir !== '/') 
             ? '/' . implode('/', array_map('rawurlencode', explode('/', trim($parentDir, '/')))) 
             : '/';
-        echo '<a href="?dir=' . htmlspecialchars($parentUrl) . '" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Go Back</a>';
+        
         exit;
     } else {
         echo '<div class="alert alert-danger">Cannot read this file.</div>';
