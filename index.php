@@ -62,7 +62,7 @@ if (isset($_GET['zip']) && $_GET['zip'] === '1' && isset($_GET['dirToZip'])) {
     <h1>Folder: <?php echo htmlspecialchars($_GET['dir'] ?? '/'); ?></h1>
 </header>
 
-<div class="container">
+<div class="container" style="padding-bottom: 100px;">
 
 <?php
 // URL decode ve path oluşturma
