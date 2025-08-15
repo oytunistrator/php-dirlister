@@ -24,19 +24,39 @@
 $baseDirectory = realpath('.');
 $dirParam = $_GET['dir'] ?? '/';
 
-// URL’den gelen path’i decode et
+// 1. URL decode et (boşluk, özel karakterler)
 $requestPathDecoded = rawurldecode($dirParam);
 
-// Geçerli klasör yolunu oluştur
-$currentDirectory = realpath($baseDirectory . ($requestPathDecoded === '/' ? '' : $requestPathDecoded));
+// 2. Full path oluştur
+$fullPath = $baseDirectory . ($requestPathDecoded === '/' ? '' : $requestPathDecoded);
 
-$ignoreList = [".", "..", "awstatsicons", "index.php", "icon", "awstats-icon", "index.html", ".htaccess", ".user.ini"];
+// 3. Gerçek path (symlink çözümü ve normalizasyon)
+$realPath = realpath($fullPath);
+// 4. Güvenlik kontrolleri
+if (
+    $realPath === false ||               // Dizin yok
+    !is_dir($realPath) ||                // Gerçekten dizin değilse
+    strpos($realPath, $baseDirectory) !== 0 // Base directory dışına çıkıyorsa
+) {
+    header("HTTP/1.1 400 Bad Request");
+    echo '<div class="alert alert-danger">Invalid directory or access denied.</div>';
 
-// Güvenlik kontrolü: baseDirectory dışına çıkma engeli
-if ($currentDirectory === false || strpos($currentDirectory, $baseDirectory) !== 0 || !is_dir($currentDirectory)) {
-    echo '<div class="alert alert-danger">Folder not exist or access denied.</div>';
+    // Geri butonunu göster
+    $parentDirectory = dirname($requestPathDecoded);
+    if ($parentDirectory !== '/' && $parentDirectory !== '.' && $parentDirectory !== '') {
+        $parentParts = explode('/', trim($parentDirectory, '/'));
+        $parentUrlEncoded = '/' . implode('/', array_map('rawurlencode', $parentParts));
+        echo '<a href="?dir=' . htmlspecialchars($parentUrlEncoded) . '" class="btn btn-secondary mt-3"><i class="bi bi-arrow-left"></i> Go Back</a>';
+    } else {
+        // Eğer kök dizindeyse ana sayfaya dön
+        echo '<a href="?dir=/" class="btn btn-secondary mt-3"><i class="bi bi-arrow-left"></i> Go Back</a>';
+    }
+
     exit;
 }
+
+// === Ignore list ===
+$ignoreList = [".", "..", "awstatsicons", "index.php", "icon", "awstats-icon", "index.html", ".htaccess", ".user.ini"];
 
 // === BREADCRUMB ===
 $breadcrumbs = [];
@@ -64,7 +84,7 @@ if ($parentDirectory !== '/' && $parentDirectory !== '.' && $parentDirectory !==
 }
 
 // === DİZİN LİSTELEME ===
-if ($dir_handle = opendir($currentDirectory)) {
+if ($dir_handle = opendir($realPath)) {
     echo '<div class="list-group">';
     while (($file = readdir($dir_handle)) !== false) {
         if (!in_array($file, $ignoreList)) {
@@ -72,7 +92,7 @@ if ($dir_handle = opendir($currentDirectory)) {
             $filePath = ($requestPathDecoded === '/' ? '' : $requestPathDecoded) . '/' . $encodedFile;
             $filePath = str_replace('//', '/', $filePath);
 
-            if (is_dir($currentDirectory . '/' . $file)) {
+            if (is_dir($realPath . '/' . $file)) {
                 echo '<a href="?dir=' . htmlspecialchars($filePath) . '" class="list-group-item list-group-item-action list-group-item-primary">
                         <i class="bi bi-folder"></i> ' . htmlspecialchars($file) . '
                       </a>';
