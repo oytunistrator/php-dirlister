@@ -62,7 +62,7 @@ if (isset($_GET['zip']) && $_GET['zip'] === '1' && isset($_GET['dirToZip'])) {
     <h1>Folder: <?php echo htmlspecialchars($_GET['dir'] ?? '/'); ?></h1>
 </header>
 
-<div class="container" style="padding-bottom: 100px;">
+<div class="container mt-2" style="padding-bottom: 100px;">
 
 <?php
 // URL decode ve path oluşturma
@@ -73,12 +73,17 @@ $realPath = realpath($fullPath);
 // Güvenlik kontrolü
 if ($realPath === false || !is_dir($realPath) || strpos($realPath, $baseDirectory) !== 0) {
     header("HTTP/1.1 400 Bad Request");
-    echo '<div class="alert alert-danger">Invalid directory or access denied.</div>';
+    
     $parentDirectory = dirname($requestPathDecoded);
     $parentUrl = ($parentDirectory && $parentDirectory !== '.' && $parentDirectory !== '/') 
         ? '/' . implode('/', array_map('rawurlencode', explode('/', trim($parentDirectory, '/')))) 
         : '/';
-    echo '<a href="?dir=' . htmlspecialchars($parentUrl) . '" class="btn btn-secondary mt-3"><i class="bi bi-arrow-left"></i> Go Back</a>';
+    $domain = $_SERVER['HTTP_HOST'];
+    echo '<nav aria-label="breadcrumb"><ol class="breadcrumb">';
+    echo '<li class="breadcrumb-item"><a href="/">'.$domain.'</a></li>';
+    echo '</ol></nav>';
+    echo '<a href="?dir=' . htmlspecialchars($parentUrl) . '" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Go Back</a>';
+    echo '<div class="alert alert-danger mt-2">Invalid directory or access denied.</div>';
     exit;
 }
 
