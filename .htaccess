@@ -1,13 +1,13 @@
 RewriteEngine On
 RewriteBase /
 
-# Mevcut dosya veya dizin varsa yönlendirme yapma
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# index.php'nin kendisini rewrite etme
+RewriteRule ^index\.php$ - [L]
+
+# Gerçek DOSYALAR doğrudan sunulsun
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# Kök dizin
-RewriteRule ^$ index.php?dir=/ [L,QSA,B]
-
-# Diğer tüm yollar
-RewriteRule ^(.*)$ index.php?dir=/$1 [L,QSA,B]
+# Her şey index.php'ye
+RewriteRule ^$ index.php?dir=/ [L,QSA]
+RewriteRule ^(.+?)/?$ index.php?dir=/$1/ [L,QSA]
