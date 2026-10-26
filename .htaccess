@@ -1,13 +1,9 @@
-RewriteEngine On
-RewriteBase /
+Options -Indexes -MultiViews
+DirectoryIndex index.php
 
-# index.php'nin kendisini rewrite etme
-RewriteRule ^index\.php$ - [L]
-
-# Gerçek DOSYALAR doğrudan sunulsun
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# Her şey index.php'ye
-RewriteRule ^$ index.php?dir=/ [L,QSA]
-RewriteRule ^(.+?)/?$ index.php?dir=/$1/ [L,QSA]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^index\.php$ - [L]
+    RewriteRule (^|/)\. - [F,L,NC]
+    RewriteRule ^(.*)$ index.php?route=$1 [B,L,QSA]
+</IfModule>
