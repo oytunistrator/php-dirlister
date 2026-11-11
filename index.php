@@ -78,9 +78,81 @@ function download_file($root, $parts) {
     if ($handle === false) fail_request(403, 'File is not readable.');
     $name = basename($path); $size = @filesize($path);
     header('Content-Type: application/octet-stream'); header('Content-Disposition: ' . attachment($name));
-    header('Content-Transfer-Encoding: binary'); header('Accept-Ranges: none');
-    if ($size !== false) header('Content-Length: ' . $size);
-    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') stream_handle($handle); else fclose($handle);
+    header('Content-Transfer-Encoding: binary');
+    if ($size === false) {
+        header('Accept-Ranges: none');
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') stream_handle($handle); else fclose($handle);
+        exit;
+    }
+
+    header('Accept-Ranges: bytes');
+    $mtime = @filemtime($path);
+    if ($mtime !== false) header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+    $start = 0; $end = $size - 1; $partial = false;
+    $range = $_SERVER['HTTP_RANGE'] ?? '';
+    $ifRange = trim($_SERVER['HTTP_IF_RANGE'] ?? '');
+    if ($ifRange !== '') {
+        $ifRangeTime = strtotime($ifRange);
+        if ($mtime === false || $ifRangeTime === false || $mtime > $ifRangeTime) $range = '';
+    }
+    if (preg_match('/^bytes=(\d*)-(\d*)$/D', $range, $match)) {
+        $first = $match[1]; $last = $match[2];
+        if (($first === '' && $last === '') || $size === 0) {
+            fclose($handle);
+            header('Content-Range: bytes */' . $size);
+            fail_request(416, 'Requested range is not satisfiable.');
+        }
+        if ($first === '') {
+            $normalizedSuffix = ltrim($last, '0');
+            if ($normalizedSuffix === '') {
+                fclose($handle);
+                header('Content-Range: bytes */' . $size);
+                fail_request(416, 'Requested range is not satisfiable.');
+            }
+            $suffix = filter_var($normalizedSuffix, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            $start = $suffix === false ? 0 : max(0, $size - $suffix);
+        } else {
+            $normalizedStart = ltrim($first, '0');
+            if ($normalizedStart === '') $normalizedStart = '0';
+            $start = filter_var($normalizedStart, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+            $normalizedEnd = ltrim($last, '0');
+            if ($normalizedEnd === '') $normalizedEnd = '0';
+            $requestedEnd = $last === '' ? $size - 1 : filter_var($normalizedEnd, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+            if ($last !== '' && $requestedEnd === false) $requestedEnd = $size - 1;
+            if ($start === false || $requestedEnd === false || $start >= $size || $requestedEnd < $start) {
+                fclose($handle);
+                header('Content-Range: bytes */' . $size);
+                fail_request(416, 'Requested range is not satisfiable.');
+            }
+            $end = min($requestedEnd, $size - 1);
+        }
+        $partial = true;
+    }
+
+    $length = $size === 0 ? 0 : $end - $start + 1;
+    if ($partial) {
+        http_response_code(206);
+        header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
+    }
+    header('Content-Length: ' . $length);
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'HEAD') {
+        fclose($handle);
+    } elseif ($length === 0) {
+        fclose($handle);
+    } elseif (fseek($handle, $start) !== 0) {
+        fclose($handle);
+        fail_request(500, 'Could not seek to the requested file range.');
+    } else {
+        @set_time_limit(0);
+        while ($length > 0 && !feof($handle)) {
+            $chunk = @fread($handle, min(1048576, $length));
+            if ($chunk === false || $chunk === '') break;
+            echo $chunk;
+            $length -= strlen($chunk);
+            flush();
+        }
+        fclose($handle);
+    }
     exit;
 }
 function download_zip($root, $parts) {
